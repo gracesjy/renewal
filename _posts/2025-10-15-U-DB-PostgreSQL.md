@@ -159,3 +159,7 @@ try:
 except Exception as e:
     print(f"오류 발생: {e}")
 ```
+
+---------
+
+[pca.csv 파일 다운로드](/assets/data/pca.csv)
