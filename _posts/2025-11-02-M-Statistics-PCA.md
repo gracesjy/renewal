@@ -1,7 +1,7 @@
 ---
 title: PCA
 img_path: /assets/images/
-author: Raymond
+author: Alex
 date: 2025-11-02
 category: [Manufacturing, Statistics, PCA Analysis]
 tags:

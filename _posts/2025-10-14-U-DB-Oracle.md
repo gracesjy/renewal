@@ -1,7 +1,7 @@
 ---
 title: Oracle Database Handling for Analysis
 img_path: /assets/images/
-author: Raymond
+author: Alex
 date: 2025-10-14
 category: [Utility, Database, Oracle]
 tags:

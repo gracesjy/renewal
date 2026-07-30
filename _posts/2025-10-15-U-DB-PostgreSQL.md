@@ -1,7 +1,7 @@
 ---
 title: PostgreSQL Handling for Analysis
 img_path: /assets/images/
-author: Raymond
+author: Alex
 date: 2025-10-15
 category: [Utility, Database, PostgreSQL]
 tags:
