@@ -698,4 +698,4 @@ except Exception as e:
 ![All Data Type](/assets/images/2026-07-30-120439.png)
 
 -----------------
-[pca.csv 파일 다운로드](/assets/data/pca.csv)
+[pca.csv]({{ '/assets/data/pca.csv' | relative_url }})

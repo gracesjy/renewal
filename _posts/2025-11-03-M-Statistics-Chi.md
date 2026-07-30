@@ -207,6 +207,5 @@ lot_id가 들어가면 단순히 "48PARA-03 설비의 산포가 크다"에서 �
 
 -----
 
-[pca.csv 파일 다운로드](/assets/data/lot_sum.csv)
 
 [다운로드]({{ '/assets/data/pca.csv' | relative_url }})

@@ -162,4 +162,4 @@ except Exception as e:
 
 ---------
 
-[pca.csv 파일 다운로드](/assets/data/pca.csv)
+[pca.csv]({{ '/assets/data/pca.csv' | relative_url }})
