@@ -288,7 +288,7 @@ Cluster C
 
 센서를 자동으로 그룹화할 수 있다.
 
-![OK ?](../assets/images/2026-07-30-105321.png)
+![OK ?](/assets/images/2026-07-30-105321.png)
 
 ---
 
