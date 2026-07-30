@@ -204,6 +204,7 @@ plt.show()
 lot_id가 들어가면 단순히 "48PARA-03 설비의 산포가 크다"에서 끝나는 것이 아니라, "48PARA-03 설비에서 불량률을 크게 끌어올린 원인 LOT(worst_lots)이 무엇인가?"까지 파이썬 콘솔 창에서 바로 찾아내어 원인 분석(Root Cause Analysis)으로 이어갈 수 있습니다.
 
 
+
 -----
 
 [pca.csv 파일 다운로드](/assets/data/lot_sum.csv)
