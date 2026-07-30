@@ -1,9 +1,9 @@
 ---
-title: PCA
+title: Chi-Square Test
 img_path: /assets/images/
 author: Raymond
 date: 2025-11-02
-category: [Manufacturing, Statistics, Chi-Square Test]
+category: [Manufacturing, Statistics, Descriptive, Chi-Square Test]
 tags:
  - Chi-Square Test
  - Equipment Significant Difference
