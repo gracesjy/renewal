@@ -290,17 +290,165 @@ Cluster C
 
 ![2026-07-30-110121.png](/assets/images/2026-07-30-110121.png)
 
+영향도가 큰 센서(파라미터)들은 대략 다음과 같다.
+
+DB에서 데이터를 읽어오는 중...
+Pivot 변환 중...
+변환 및 정제 완료: 474개 유효 센서, 1567개 시계열 포인트
+상관계수 계산 중...
+계층적 군집화 연산 중...
+
+============================================================
+ [센서 배치 및 정보 출력]
+============================================================
+1. 군집화 최종 참여 센서 수: 총 474개
+2. 차트 [좌측 상단] 붉은 블록부터 배치된 센서 순서 (Top 30 예시):
+   위치 001: param_347
+   위치 002: param_206
+   위치 003: param_478
+   위치 004: param_074
+   위치 005: param_209
+   위치 006: param_342
+   위치 007: param_473
+   위치 008: param_474
+   위치 009: param_201
+   위치 010: param_337
+   위치 011: param_472
+   위치 012: param_015
+   위치 013: param_286
+   위치 014: param_151
+   위치 015: param_424
+   위치 016: param_202
+   위치 017: param_338
+   위치 018: param_200
+   위치 019: param_471
+   위치 020: param_339
+   위치 021: param_203
+   위치 022: param_475
+   위치 023: param_334
+   위치 024: param_198
+   위치 025: param_470
+   위치 026: param_336
+   위치 027: param_067
+   위치 028: param_477
+   위치 029: param_205
+   위치 030: param_341
+..
+
+소스는 다음과 같다.
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sqlalchemy import create_engine
+
+# 1. DB 접속 정보 설정 - 적절히 수정 필요
+DB_USER = "000"
+DB_PASS = "000"
+DB_HOST = "localhost"
+DB_PORT = "1521"
+DB_SERVICE = "FREE"
+
+db_url = f"oracle+oracledb://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/?service_name={DB_SERVICE}"
+engine = create_engine(db_url)
+
+try:
+    # 2. DB에서 데이터 읽어오기
+    query = """
+        SELECT sequence, variable, value
+        FROM pca_sensor_data
+    """
+    print("DB에서 데이터를 읽어오는 중...")
+    df_long = pd.read_sql(query, con=engine)
+    df_long.columns = [col.lower() for col in df_long.columns]
+
+    # 3. Pivot 변환
+    print("Pivot 변환 중...")
+    df_wide = df_long.pivot(index='sequence', columns='variable', values='value')
+
+    # [데이터 정제 1] 무한대(Inf) 값을 NaN으로 변경 후 결측치 처리
+    df_wide = df_wide.replace([np.inf, -np.inf], np.nan).ffill().bfill().fillna(0)
+
+    # [데이터 정제 2] 표준편차가 0이거나 NaN인 죽은 센서 완전 제거
+    std_series = df_wide.std()
+    valid_sensors = std_series[(std_series > 1e-12) & (std_series.notna())].index
+    df_wide = df_wide[valid_sensors]
+
+    print(f"변환 및 정제 완료: {df_wide.shape[1]}개 유효 센서, {df_wide.shape[0]}개 시계열 포인트")
+
+    # 4. 상관계수 행렬 계산
+    print("상관계수 계산 중...")
+    corr_matrix = df_wide.corr(method='pearson')
+
+    # [데이터 정제 3] 이상치 및 범위(-1.0 ~ 1.0) 조율
+    corr_matrix = corr_matrix.replace([np.inf, -np.inf], np.nan).fillna(0)
+    corr_matrix = corr_matrix.clip(lower=-1.0, upper=1.0)
+
+    # read-only 메모리 이슈 방지를 위한 안전한 대각선(1.0) 처리
+    matrix_values = corr_matrix.to_numpy(copy=True)
+    np.fill_diagonal(matrix_values, 1.0)
+    corr_matrix = pd.DataFrame(matrix_values, index=corr_matrix.index, columns=corr_matrix.columns)
+
+    # 5. 계층적 군집화 계산 (객체 생성)
+    print("계층적 군집화 연산 중...")
+    g = sns.clustermap(
+        corr_matrix,
+        method='average',
+        metric='euclidean',
+        cmap='vlag',
+        vmin=-1, vmax=1,
+        figsize=(14, 14),
+        xticklabels=False,
+        yticklabels=False,
+        cbar_kws={'label': 'Correlation'}
+    )
+    plt.suptitle('Hierarchical Clustering of Sensors (Cleaned)', y=1.02, fontsize=16)
+
+    # 6. 콘솔 출력 및 CSV 저장 (plt.show() 전에 실행)
+    print("\n" + "="*60)
+    print(" [센서 배치 및 정보 출력] ")
+    print("="*60)
+
+    # [A] 실제 군집화에 사용된 전체 센서 리스트
+    participated_sensors = corr_matrix.columns.tolist()
+    print(f"1. 군집화 최종 참여 센서 수: 총 {len(participated_sensors)}개")
+
+    # [B] X축(좌->우) / Y축(상->하)에 재배치된 센서 순서 리스트
+    # ★ 수정: reorder_ind -> reordered_ind
+    axis_sensor_order = corr_matrix.columns[g.dendrogram_row.reordered_ind].tolist()
+
+    print("\n2. 차트 [좌측 상단] 붉은 블록부터 배치된 센서 순서 (Top 30 예시):")
+    for idx, sensor_name in enumerate(axis_sensor_order[:30], 1):
+        print(f"   위치 {idx:03d}: {sensor_name}")
+
+    # [C] 전체 순서를 CSV로 저장
+    df_order = pd.DataFrame({
+        'plot_position_index': range(1, len(axis_sensor_order) + 1),
+        'sensor_name': axis_sensor_order
+    })
+    df_order.to_csv("clustermap_sensor_order.csv", index=False, encoding='utf-8-sig')
+    print(f"\n3. 전체 {len(axis_sensor_order)}개 센서의 차트 배치 순서가 'clustermap_sensor_order.csv' 파일로 저장되었습니다.")
+    print("="*60)
+    print("콘솔 확인 완료. 차트 창을 엽니다...\n")
+
+    output_filename = "clustermap_result.png"
+    plt.savefig(output_filename, dpi=300, bbox_inches='tight')
+    print(f"차트 이미지가 '{output_filename}' 파일로 저장되었습니다.")
+    # 7. 차트 출력
+    plt.show()
+
+except Exception as e:
+    print(f"오류 발생: {e}")
+```
 ---
 
 ## PCA와의 연결
 
-Hierarchical Clustering은
+Hierarchical Clustering은 끝이 아니다.
 
-끝이 아니다.
-
-다음 단계는
-
-PCA이다.
+다음 단계는 PCA이다.
 
 ```
 Raw Sensors
