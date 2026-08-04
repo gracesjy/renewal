@@ -68,7 +68,8 @@ gh auth login
 
 주의할 것은 디폴트 선택을 하면 무난하다.  웹 브라우저가 떠서 위에서 보여주는 콘솔의 코드를 붙여 넣기를 해야 한다는 점(1), 그리고 2FA 때문에 모바일에서 Confirm 을 해 주어야 최종적으로 모든 것이 마무리 된다.
 
-아래 WSL Ubuntu 에서 VS Code 를 실행 시키고 거기에서 commit 을 하려면 반드시 다음 명령어를 준비해서 입력해야 한다.
+아래 WSL Ubuntu 에서 VS Code 를 실행 시키고 거기에서 commit 을 하려면 반드시 다음 명령어를 WSL Ubuntu 의 콘솔에서 입력해야 한다.  안하면 VS Code 의 Commit 을 누르면 오류가 난다.
+
 ```bash
 git config --global user.name "본인이름 또는 GitHub 계정명"
 git config --global user.email "GitHub이메일주소@example.com"
@@ -88,5 +89,8 @@ VS Code 에서 Ctrl + Shift + P 를 누르면 Python: Select Interpreter 를 치
 
 그 이후에는 Ctrl + Shift + P 를 누르고 Python: Select Interpreter 를 치면 다음 처럼 목록이 나온다. 이것들은 WSL Ubuntu 에서 conda create -n .. 으로 만든 가상 환경이다. 이 중에 맞는 것을 선택하면 된다.  만약 이것이 안되면 Enter interpreter path.. 를 눌러서 직접 Python 위치를 정확히 넣으면 된다.
 ![2026-08-04-135155.png](/assets/images/2026-08-04-135155.png)
+
+잘 세팅되면 다음과 같이 실행 버튼이 생긴다.
+![2026-08-04-140524.png](/assets/images/2026-08-04-140524.png)
 
 
