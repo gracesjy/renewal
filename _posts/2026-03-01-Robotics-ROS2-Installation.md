@@ -126,7 +126,7 @@ source ~/.bashrc
 ```
 
 ### Step 7. 설치 정상 동작 확인 (Talker / Listener 테스트)
-설치가 완료되었는지 확인하기 위해 2개의 터미널에서 간단한 통신 테스트를 진행합니다.  아래 두가지의 통신이 완성되면 Jazzy 설치가 끝났다고 볼 수 있습니다.
+설치가 완료되었는지 확인하기 위해 2개의 터미널에서 간단한 통신 테스트를 진행합니다.  아래 두가지의 통신이 완성되면 Jazzy 설치가 끝났다고 볼 수 있다.  
 
 #### 1. 첫 번째 터미널 (Talker 실행):
 ```bash
@@ -136,6 +136,19 @@ ros2 run demo_nodes_cpp talker
 ```bash
 ros2 run demo_nodes_py listener
 ```
+아래 캡처한 것 처럼 데이터 Pub/Sub 으로 데이터 통신이 되는 것을 확인할 수가 있다.
+![2026-08-04-151419.png](/assets/images/2026-08-04-151419.png)
 
+## Vmware 에서 Ubuntu 24.04 LTS Desktop 설치
+WSL Ubuntu 에서 ROS2 를 설치해도 문제가 되는 것은 Multicast 통신 때문이다. 이것은 한계라고 볼 수 있다.  그러나, Vmware 에서 Network 을 Brideged 로 설정하면 원격의 라즈베리파이의 노드의 데이터를 받아 볼 수가 있다.  물론 Windows 방화벽 처리만 되면 말이다.   그러나, WSL Ubuntu 는 그 상태에서도 받기 어렵다.
 
+### WSL에서 ROS2를 사용할 때의 한계
+ROS2는 노드를 자동으로 찾기 위해 DDS(Data Distribution Service) 를 사용한다.  DDS는 기본적으로 Multicast를 이용하여 같은 네트워크에 있는 다른 ROS2 노드를 자동으로 발견(Discovery)한다.  따라서 일반적인 Ubuntu에서는 별도의 설정 없이도 다른 컴퓨터의 ROS2 노드를 자동으로 찾을 수 있다.
 
+![2026-08-04-150851.png](/assets/images/2026-08-04-150851.png)
+
+그러나, WSL 구조는 다르다.
+
+![2026-08-04-151048.png](/assets/images/2026-08-04-151048.png)
+
+그래서 WSL 기반 Ubuntu 에서는 DDS 데이타 통신이 되지 않는다.  따라서 ROS2 는 Vmware 를 사용하는 것을 강력히 추천한다.
