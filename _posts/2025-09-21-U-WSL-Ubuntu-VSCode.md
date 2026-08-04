@@ -52,6 +52,27 @@ Compatibility check successful (0)
 
 그러면 Restricted Mode 는 없어지고 여기에서 정상적으로 파일을 편집하고 생성 하는 등의 작업을 할 수 있게 된다.
 
+## WSL Ubuntu 에 Git 관련 설정
+공개 레포지터리(public repository) 가 아닌 자신의 비공개 등에 접근하기 위해서는 다음의 순서로 설치를 먼저 해 주어야 한다.
+
+```bash
+sudo apt update && sudo apt install -y gh
+sudo apt update && sudo apt install -y wslu
+sudo bash -c 'echo -e "[interop]\nenabled=true\nappendWindowsPath=true" >> /etc/wsl.conf'
+```
+
+다음에 로그인을 해야 한다.
+```bash
+gh auth login
+```
+
+주의할 것은 디폴트 선택을 하면 무난하다.  웹 브라우저가 떠서 위에서 보여주는 콘솔의 코드를 붙여 넣기를 해야 한다는 점(1), 그리고 2FA 때문에 모바일에서 Confirm 을 해 주어야 최종적으로 모든 것이 마무리 된다.
+
+아래 WSL Ubuntu 에서 VS Code 를 실행 시키고 거기에서 commit 을 하려면 반드시 다음 명령어를 준비해서 입력해야 한다.
+```bash
+git config --global user.name "본인이름 또는 GitHub 계정명"
+git config --global user.email "GitHub이메일주소@example.com"
+```
 
 ## VS Code 의 Python 설정
 
@@ -59,5 +80,13 @@ Compatibility check successful (0)
 
 ![2026-08-04-120503.png](/assets/images/2026-08-04-120503.png)
 
+
+VS Code 에서 Ctrl + Shift + P 를 누르면 Python: Select Interpreter 를 치면 나와야 한다. 그런데, 안나오는 경우가 있다.  그때에는 아래 처럼 패키지에서 일단 Python 을 하나 설치하면 된다.  
+
 패키지에서 Python 을 치면 WSL Ubuntu 관련 패키지들이 나오는데, 
 ![2026-08-04-122002.png](/assets/images/2026-08-04-122002.png)
+
+그 이후에는 Ctrl + Shift + P 를 누르고 Python: Select Interpreter 를 치면 다음 처럼 목록이 나온다. 이것들은 WSL Ubuntu 에서 conda create -n .. 으로 만든 가상 환경이다. 이 중에 맞는 것을 선택하면 된다.  만약 이것이 안되면 Enter interpreter path.. 를 눌러서 직접 Python 위치를 정확히 넣으면 된다.
+![2026-08-04-135155.png](/assets/images/2026-08-04-135155.png)
+
+
