@@ -2,7 +2,7 @@
 title: ROS2 Installation
 img_path: /assets/images/
 author: Alex
-date: 2025-09-24
+date: 2026-03-01
 category: [Robotics, ROS2, ROS2 Install]
 tags:
  - ROS2 jazzy Install
