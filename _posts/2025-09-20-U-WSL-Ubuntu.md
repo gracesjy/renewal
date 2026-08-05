@@ -2,6 +2,7 @@
 title: WSL Ubuntu, Anaconda, Oracle Import
 img_path: /assets/images/
 author: Alex
+math: true
 date: 2025-09-20
 category: [Utility, WSL Ubuntu, Ubuntu 24.04 LTS]
 tags:

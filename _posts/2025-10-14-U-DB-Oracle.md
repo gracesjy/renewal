@@ -2,6 +2,7 @@
 title: Oracle Database Handling for Analysis
 img_path: /assets/images/
 author: Alex
+math: true
 date: 2025-10-14
 category: [Utility, Database, Oracle]
 tags:

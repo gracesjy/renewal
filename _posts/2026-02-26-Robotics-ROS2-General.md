@@ -2,6 +2,7 @@
 title: About ROS2
 img_path: /assets/images/
 author: Alex
+math: true
 date: 2025-09-24
 category: [Robotics, ROS2, ROS2 General]
 tags:

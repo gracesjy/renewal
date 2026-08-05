@@ -2,6 +2,7 @@
 title: PostgreSQL Handling for Analysis
 img_path: /assets/images/
 author: Alex
+math: true
 date: 2025-10-15
 category: [Utility, Database, PostgreSQL]
 tags:

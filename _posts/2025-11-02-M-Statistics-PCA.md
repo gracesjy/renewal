@@ -2,6 +2,7 @@
 title: PCA
 img_path: /assets/images/
 author: Alex
+math: true
 date: 2025-11-02
 category: [Manufacturing, Statistics, PCA Analysis]
 tags:

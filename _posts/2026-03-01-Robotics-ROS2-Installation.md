@@ -2,6 +2,7 @@
 title: ROS2 Installation
 img_path: /assets/images/
 author: Alex
+math: true
 date: 2026-03-01
 category: [Robotics, ROS2, ROS2 Install]
 tags:

@@ -2,6 +2,7 @@
 title: Statistics Approach
 img_path: /assets/images/
 author: Alex
+math: true
 date: 2025-10-28
 category: [Manufacturing, Statistics, Statistics Approach]
 tags:
