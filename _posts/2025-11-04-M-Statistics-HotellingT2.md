@@ -319,3 +319,126 @@ plt.show()
 ### 설명
 
 개별적으로는 단변량일 경우 문제가 없을 수 있지만, 이 Hotelling T2 로 보면 다르다.  그리고 어떤 변수가 가장 큰 영향을 끼친 것을 우측의 Radar 로 볼 수 있다.  Power 가 가장 큰 영향을 끼쳤다.
+
+
+## 이상 발생 기여도 예제
+```python
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# ==========================================
+# 1. Raw Data 생성 (Phase I 정상 / Phase II 이상)
+# ==========================================
+np.random.seed(42)
+
+p_vars = ['Temp', 'Press', 'Power']
+p = len(p_vars)
+
+mean_true = [150.0, 10.0, 300.0]
+cov_true = [[4.0, 0.8, 1.2], 
+            [0.8, 0.25, 0.3], 
+            [1.2, 0.3, 9.0]]
+
+# Phase I 정상 데이터 (100개)
+df_phase1 = pd.DataFrame(
+    np.random.multivariate_normal(mean_true, cov_true, size=100), 
+    columns=p_vars
+)
+
+# Phase II 실시간 모니터링 데이터 (50개: 1~30번 정상 / 31~50번 Power 및 온도 이상)
+raw_normal = np.random.multivariate_normal(mean_true, cov_true, size=30)
+raw_abnormal = np.random.multivariate_normal([152.0, 10.1, 312.0], cov_true, size=20)
+df_phase2 = pd.DataFrame(np.vstack([raw_normal, raw_abnormal]), columns=p_vars)
+
+
+# ==========================================
+# 2. Raw Data 통계량 및 T2 계산
+# ==========================================
+X_p1 = df_phase1.values
+n_p1 = len(X_p1)
+
+# Phase I 기준 매개변수 (평균 벡터, 공분산 행렬, 역행렬)
+mean_vec = np.mean(X_p1, axis=0)
+X_centered = X_p1 - mean_vec
+cov_mat = (X_centered.T @ X_centered) / (n_p1 - 1)
+cov_inv = np.linalg.inv(cov_mat)
+
+# Phase II T2 통계량 산출
+X_p2 = df_phase2.values
+n_p2 = len(X_p2)
+
+t2_values = []
+for i in range(n_p2):
+    diff = X_p2[i] - mean_vec
+    t2 = diff.T @ cov_inv @ diff
+    t2_values.append(t2)
+
+t2_values = np.array(t2_values)
+
+# 상한 관리한계선(UCL, alpha=0.01)
+alpha = 0.01
+f_crit = stats.f.ppf(1 - alpha, p, n_p1 - p)
+UCL = (p * (n_p1 + 1) * (n_p1 - 1)) / (n_p1 * (n_p1 - p)) * f_crit
+
+
+# ==========================================
+# 3. 이상 샘플들의 변수별 기여도(Contribution) 산출
+# ==========================================
+def calculate_contribution(x_sample, mean_vec, cov_inv):
+    diff = x_sample - mean_vec
+    # d_j * (S^-1 * d)_j
+    return diff * (cov_inv @ diff)
+
+outlier_indices = np.where(t2_values > UCL)[0]
+
+if len(outlier_indices) > 0:
+    outlier_contributions = [calculate_contribution(X_p2[i], mean_vec, cov_inv) for i in outlier_indices]
+    avg_contribution = np.mean(outlier_contributions, axis=0)
+else:
+    avg_contribution = np.zeros(p)
+
+
+# ==========================================
+# 4. 시각화 (T2 Control Chart & Bar Contribution Chart)
+# ==========================================
+fig, ax = plt.subplots(1, 2, figsize=(15, 5))
+
+# --- (1) 일반 T2 관리도 ---
+ax[0].plot(range(1, n_p2 + 1), t2_values, marker='o', color='b', label='$T^2$ Stat')
+ax[0].axhline(y=UCL, color='r', linestyle='--', label=f'UCL ({UCL:.2f})')
+ax[0].axvline(x=30, color='gray', linestyle=':', label='Fault Occurred')
+ax[0].plot(outlier_indices + 1, t2_values[outlier_indices], 'ro', label='Out of Control')
+ax[0].set_title("Hotelling $T^2$ Control Chart", fontsize=13)
+ax[0].set_xlabel("Sample Number")
+ax[0].set_ylabel("$T^2$ Value")
+ax[0].grid(True, alpha=0.3)
+ax[0].legend()
+
+
+# --- (2) 변수별 기여도 막대그래프 (Bar Contribution Plot) ---
+colors = ['#4C72B0', '#DD8452', '#C44E52']  # Temp, Press, Power 구분 색상
+bars = ax[1].bar(p_vars, avg_contribution, color=colors, edgecolor='black', alpha=0.85)
+
+# 수치 데이터 막대 위에 표시
+for bar in bars:
+    height = bar.get_height()
+    ax[1].annotate(f'{height:.2f}',
+                    xy=(bar.get_x() + bar.get_width() / 2, height),
+                    xytext=(0, 3),  # 3pt vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+ax[1].set_title("Out-of-Control Contribution Plot (Bar Chart)", fontsize=13)
+ax[1].set_xlabel("Process Variables", fontsize=11)
+ax[1].set_ylabel("Average Contribution to $T^2$", fontsize=11)
+ax[1].grid(True, axis='y', linestyle='--', alpha=0.5)
+
+plt.tight_layout()
+plt.show()
+
+```
+이상발생에 대한 기여도를 보여준다.
+![2026-08-05-110454.png](/assets/images/2026-08-05-110454.png)

@@ -1,5 +1,5 @@
 ---
-title: Sensor Relationship Analysis using Correlation Matrix and Hierarchical Clustering
+title: Machine Learning RNN
 img_path: /assets/images/
 author: Alex
 date: 2025-11-01
