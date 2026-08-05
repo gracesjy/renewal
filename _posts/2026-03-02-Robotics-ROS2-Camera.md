@@ -3,7 +3,7 @@ title: ROS2 Camera Publish
 img_path: /assets/images/
 author: Alex
 math: true
-date: 2025-09-24
+date: 2026-03-02
 category: [Robotics, ROS2, ROS2 Camera Publish]
 tags:
  - ROS2 Camera Publish
