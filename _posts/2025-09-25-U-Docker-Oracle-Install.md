@@ -1,0 +1,114 @@
+---
+title: Fast Oracle DB Installation on Docker Desktop
+img_path: /assets/images/
+author: Alex
+math: true
+date: 2025-09-25
+category: [Utility, Docker, Docker Desktop]
+tags:
+ - Oracle Database
+layout: post
+---
+
+## 선행 준비
+먼저 Docker Desktop 이 설치되어 있어야 하고, 실행 가능해야 한다. 또한 Power Shell 을 일반 권한으로 띄워서 docker 명령이 실행 가능해야 한다.
+
+1. 먼저 Docker Desktop 을 실행 시킨다.
+만약 이것을 실행 시키지 않는 상태에서 Power Shell 에서 Docker run 등의 Oracle Download 를 실행 할 경우 다음의 오류 화면을 보게 된다.  오류 화면을 없애려면 Docker Desktop 을 실행시킨다.
+
+![2026-08-04-093730.png](/assets/images/2026-08-04-093730.png)
+
+2. Power Shell 실행
+
+Power Shell 을 Administrator 권한으로 실행 시킬 필요는 없다.  docker 명령을 쳤을 때 동작하면 된다.
+![2026-08-04-094340.png](/assets/images/2026-08-04-094340.png)
+
+
+## Oracle Installation
+Oracle Database 설치는 복잡했었지만, 이제는 개발을 위해서는 손쉽게 Docker 로 사용할 수 있게 되었다.
+
+Power Shell 에서 다음을 실행한다. ORACLE_PASSWORD 는 sys, system 암호이므로 기억해 두는 것이 좋겠다. 개발용이므로 보안에 큰 영향이 없다면 쉽게 기억할 수 있는 암호를 사용해라.
+
+```shell
+docker run -d --name oracle23c -p 1521:1521 -e ORACLE_PASSWORD=alex1020 gvenzl/oracle-free:latest
+```
+다운로드가 되면서 즉시 실행이되며 Docker Desktop 화면에서 실행 중인 것을 확인할 수 있다.
+
+![2026-08-04-093952.png](/assets/images/2026-08-04-093952.png)
+
+## 개발환경 마무리
+
+좀더 고수준으로 설정하고 하고 싶지만, 간단히 어플리케이션 용도로 사용한다면 다음 정도로 충분하다.
+위의 Power Shell 에서 다음의 테이블스페이스 생성, 어플리케이션 계정을 위한 사용자 생성 및 권한 등을 주면 된다.
+
+### 테이블스페이스 생성
+
+개발을 위한 테이블스페이스를 생성하는 것이 매우 중요하다.  그렇지 않으면 Oracle Database 의 시스템 테이블스페이스에다 개발에 필요한 테이블들이 생성되고 관리가 어려워지기 때문이다. 
+
+위의 Docker 에서 만든 Oracle Database 는 위에서 생성 시 --name oracle23c 으로 만들었기 때문에 바로 접근할 때 아래와 같이 -it oracle23c 로 하는 것이고 그 docker 안에 있는 sqlplus 로 콘솔을 열 때 설정한 sys, system 암호인 alex1020 을 사용하면서 디폴트 Service Name 인 FREEPDB1 으로 접속하는 것을 보여준다. 
+
+```shell
+docker exec -it oracle23c sqlplus system/alex1020@FREEPDB1
+```
+이제 테이블스페이스로 공간을 먼저 만든다. MY_DATA 는 식별되는 고유 이름이고 보통 Datafile 은 이것을 유추할 수 있는 소문자 이름과 .dbf 확장자를 개발에서는 붙여준다.  지금은 개발환경이므로 복잡한 것은 생략한다.
+
+```sql
+CREATE TABLESPACE MY_DATA
+DATAFILE 'my_data.dbf' SIZE 100M
+AUTOEXTEND ON NEXT 10M MAXSIZE UNLIMITED;
+```
+
+
+![2026-08-04-094727.png](/assets/images/2026-08-04-094727.png)
+
+### 사용자 생성 및 권한 부여
+
+사용자를 생성할 때 위에서 만든 테이블스페이스를 사용할 것이라는 것을 명시적으로 알려준다. 그리고 모든 용량을 사용할 수 있게 QUOTA 는 unlimited 로 하고 소팅 등의 작업 시 사용하는 Temporary 테이블스페이스(tablespace) 는 개발이므로 일단 TEMP 로 한다.
+
+```sql
+CREATE USER alex IDENTIFIED BY alex1020
+DEFAULT TABLESPACE MY_DATA
+TEMPORARY TABLESPACE TEMP
+QUOTA UNLIMITED ON MY_DATA;
+```
+
+권한을 준다.  이것을 안주면 DBeaver 등에서 접속 등을 할 수 없고 테이블 생성 및 VIEW 생성을 하지 못한다.  반드시 주어야 한다.
+
+```sql
+GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SYNONYM TO ALEX;
+```
+
+개발이기 때문에 공간을 마음껏 사용할 수 있게 한다.  물론 이미 게정 생성 시에 QUOTA 를 주었다.
+```sql
+ALTER USER ALEX QUOTA UNLIMITED ON MY_DATA;
+```
+
+접속하고 개발할 때에는 DBeaver 이 편하니, 지금의 콘솔 모드는 종료한다.
+
+![2026-08-04-095426.png](/assets/images/2026-08-04-095426.png)
+
+
+### DB 툴을 이용한 접속
+
+DBeaver 로 접속 설정은 매우 쉽다. 상단 메뉴에서 데이터베이스 (Database) 메뉴를 선택한 뒤에 "새 데이터베이스 연결" 을 선택하자.
+
+| 항목 | 설정값 | 비고 |
+| :--- | :--- | :--- |
+| **Host** | `localhost` | 또는 `127.0.0.1` |
+| **Port** | `1521` | 기본 오라클 포트 |
+| **Connection Type** | `Service Name` | **SID가 아닌 Service Name 선택** |
+| **Service Name** | `FREEPDB1` | PDB 서비스명 |
+| **Username** | `ALEX` | 생성한 사용자 계정 |
+| **Password** | `AlexPass123!` | 계정 비밀번호 |
+
+![2026-08-04-100120.png](/assets/images/2026-08-04-100120.png)
+
+오라클을 선택하면 필요한 Driver 들을 자동으로 설치한다.  다음(Next)을 누르자.
+![2026-08-04-100238.png](/assets/images/2026-08-04-100238.png)
+
+사용자와 암호를 입력하고 나머지들은 Docker 설치시에 이미 알고 있는 내용들이다. 다 입력 후 확인을 누르자.
+
+![2026-08-04-100325.png](/assets/images/2026-08-04-100325.png)
+
+접속을 성공하면 다음 처럼 나온다.  이제 다른 DB 처럼 사용하면 된다.
+![2026-08-04-100434.png](/assets/images/2026-08-04-100434.png)
