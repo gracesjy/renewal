@@ -399,3 +399,32 @@ Deep Learning은 SVM이나 기존 Machine Learning을 대체하기 위해 등장
 > **Machine Learning은 사람이 만든 Feature로 학습하고, Deep Learning은 Feature까지 스스로 학습한다.**
 
 이 한 문장이 두 접근법의 가장 큰 차이를 가장 잘 설명해 준다.
+
+## 참고 (Feature Engineering)
+Feature Engineering 은 입력 변수들(X 인자들) 에 대한 것으로 다음으로 분류되곤 한다.
+
+![2026-08-06-164632.png](/assets/images/2026-08-06-164632.png)
+
+### Correlation Analysis (상관 분석)
+
+아래의 경우 RF Power 는 제거될 수도 있는 것으로 이 경우는 Feature Selection (특징 선택)이다.
+
+| Feature     | Result와 상관계수 |
+| ----------- | ------------ |
+| Temperature | 0.92         |
+| Pressure    | 0.87         |
+| RF Power    | 0.18         |
+| Gas Flow    | 0.81         |
+
+### PCA (주성분 분석)
+
+Temperature,Pressure,Voltage,Current,Humidity의 5개 Feature 의 경우 PCA 를 수행하면 PC1, PC2 처럼 새로운 Feature 로 압축될 수 있다. 이것은 기존 5개의 Feature 를 변환하는 것으로 이를 Feature Extraction(특징 추출)이라고 한다.
+
+### Machine Learning vs Deep Learning
+
+기존 Machine Learning은 사람이 Feature Engineering 과정에 적극적으로 관여하고, Deep Learning은 Feature Representation 자체를 모델이 학습한다.
+
+### Domain Knowledge
+
+사람이 관여하는 Machine Learning 은 결국 Domain Knowledge 의 엔지니어가 중요한 역할을 수행하지만, Deep Learning 은 이러한 것들을 Network Layer 가 데이터로부터 학습을 하는 것이 차이가 난다.
+
