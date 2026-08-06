@@ -1,5 +1,5 @@
 ---
-title: Hotelling's $T^2$ Test
+title: Hotelling's T<sup>2</sup> Test
 img_path: /assets/images/
 math: true
 author: Alex
