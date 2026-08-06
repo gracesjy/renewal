@@ -313,6 +313,7 @@ idf.py flash monitor
 ```
 
 ## micro-ROS agent 설치 및 실행
+ESP32 micro-ROS 만으로는 ROS2 와 어떠한 통신도 이뤄지지 않는다. 이것을 연계하려면 micro-ROS 와 ROS2 를 위한 agent 가 존재해야 한다.  그것이 다음이다.
 
 ### 1. ROS 2 워크스페이스 생성 및 이동
 ```bash
@@ -346,6 +347,10 @@ source install/local_setup.bash
 ros2 run micro_ros_agent micro_ros_agent udp4 --port 8888
 ```
 위의 8888 은 idf.py menuconfig 에서 설정한 포트 번호 이어야만 한다. !! (주의)
+
+이것을 실행하고 ESP32 보드에 전원을 켜면 ESP32 에서 idf.py menuconfig 에서 설정한 서버로 자동으로 접속이 이뤄지면 바로 위의 micro-ROS agent 와 통신이 시작된다.
+
+이후에는 ROS2 기반 툴과 명령들을 사용할 수 있다.
 
 
 
