@@ -55,7 +55,7 @@ layout: post
 | Kim  | score    | 80      |
 | Lee  | score    | 70      |
 
-### name은 고정(id_vars), Math와 English 컬럼을 세로로 녹임
+### name은 고정(id_vars), Math와 English 컬럼을 세로로 Melt
 
 아래처럼, 의도된 형태로 사용해야 의미있게 된다.
 
@@ -66,6 +66,7 @@ df_melt = pd.melt(df, id_vars=['name'], var_name='subject', value_name='score')
 | Kim  | Math  | 90    |
 | Kim  | English  | 80 |
 | Lee  | Math  | 70    |
+
 ...
 
 ## Database 와 Pivot
@@ -118,6 +119,8 @@ UNPIVOT (
 |             8 |          0 |        3 | Palsson, Master. Gosta Leonard                      | male   |     2 |       3 |       1 | 349909           | 21.075  | nan     | S          |
 |             9 |          1 |        3 | Johnson, Mrs. Oscar W (Elisabeth Vilhelmina Berg)   | female |    27 |       0 |       2 | 347742           | 11.1333 | nan     | S          |
 |            10 |          1 |        2 | Nasser, Mrs. Nicholas (Adele Achem)                 | female |    14 |       1 |       0 | 237736           | 30.0708 | nan     | C          |
+
+
 ...
 
 
@@ -232,3 +235,57 @@ print(df_melt.head(10))
 
 ```
 ![2026-08-07-150045.png](/assets/images/2026-08-07-150045.png)
+
+
+## Text 기반 Pivot/Unpivot
+Text 기반에서 한번 더 Pivot 과 Unpivot(Melt) 를 연습해 보자.
+
+```python
+import pandas as pd
+
+# 1. 엑셀/텍스트 형태의 원본 데이터 (Pivot / Wide Format)
+data = {
+    'PCS_ID': ['LOT_A01', 'LOT_A01', 'LOT_A02', 'LOT_A02', 'LOT_B01', 'LOT_B01'],
+    'SEQ': [1, 2, 1, 2, 1, 2],
+    'REF_VAR1': ['PASS', 'PASS', 'FAIL', 'PASS', 'PASS', 'PASS'],
+    'REF_VAR2': ['OK', 'NG', 'OK', 'OK', 'NG', 'OK'],
+    'REF_VAR3': ['HIGH', 'NORMAL', 'LOW', 'NORMAL', 'HIGH', 'NORMAL'],
+    'REF_VAR4': ['STEP1', 'STEP2', 'STEP1', 'STEP2', 'STEP1', 'STEP2']
+}
+df = pd.DataFrame(data)
+
+print(df)
+print("----------------")
+
+# 2. 'REF_VAR'로 시작하는 변수 컬럼들만 자동으로 추출
+ref_cols = [col for col in df.columns if col.startswith('REF_VAR')]
+
+# 3. melt(unpivot) 실행
+df_pcs_melt = pd.melt(
+    df,
+    id_vars=['PCS_ID', 'SEQ'],      # 식별자 컬럼 고정
+    value_vars=ref_cols,            # 녹일 컬럼 목록
+    var_name='PARAM_NAME',          # 컬럼명이 입력될 새 컬럼명
+    value_name='PARAM_VALUE'        # 실제 값이 입력될 새 컬럼명
+)
+
+# 4. 보기 좋게 LOT/SEQ/파라미터 순으로 정렬
+df_pcs_melt = df_pcs_melt.sort_values(by=['PCS_ID', 'SEQ', 'PARAM_NAME']).reset_index(drop=True)
+print(df_pcs_melt)
+
+# df_pcs_melt 데이터를 다시 원래 표 모양으로 복원
+df_pivoted = df_pcs_melt.pivot(
+    index=['PCS_ID', 'SEQ'],    # 기준이 될 행(Row) 식별자
+    columns='PARAM_NAME',       # 새 컬럼명이 될 항목
+    values='PARAM_VALUE'        # 채워 넣을 데이터 값
+).reset_index()
+
+# 컬럼의 상위 이름(PARAM_NAME) 지우기 (인덱스 정리)
+df_pivoted.columns.name = None
+
+# 완벽하게 일치하면 True, 하나라도 다르면 False
+is_same = df.equals(df_pivoted)
+print("두 데이터프레임이 동일한가요?:", is_same)
+# 출력: True
+
+```
