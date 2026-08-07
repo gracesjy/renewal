@@ -127,7 +127,9 @@ UNPIVOT (
 [titanic.csv 다운로드]({{ '/assets/data/titanic.csv' | relative_url }})
 
 
-### 기술 통계량(Descriptive Statistics)
+### 기술 통계량(Descriptive Statistics)의 RDBMS 저장방법
+
+아래는 Titanic.csv 파일의 특정 컬럼들에 대한 기술 통계량을 계산 한 후에 이를 Melt 하여 출력하는 예제이다.  왜 Melt 했을까 ?
 
 ```python
 import pandas as pd
@@ -166,7 +168,7 @@ print(df_melt)
 
 만약 데이터베이스 (Oracle)에 titanic 테이블이 있고, 이를 이용한다고 한 후에 기술 통계량을 다시 Oracle Database 에 저장한다고 한다면 ?
 
-반도체 설비의 센서들에 대한 기술 통계량을 구해서 이를 다시 저장한다고 한다면 ?  Row 기반의 Unpivot (melt) 없이는 저장할 수 없는 이유는 바로 최대 컬럼 1,000 개 이기 때문이다.
+반도체 설비의 센서들에 대한 기술 통계량을 구해서 이를 다시 저장한다고 한다면 ?  Row 기반의 Unpivot (melt) 없이는 저장할 수 없는 이유는 바로 테이블의 최대 컬럼이 1,000 개이기 때문이며 반도체 설비의 센서들의 갯수는 수백개에서 1,000개를 넘을 수 있기 때문이기도 하다. 여기에 하나의 시계열 데이터인 센서에 대한 기술 통계량이 8개가 나온다고 가정하면 총 갯수는 다음과 같다.
 
 $$\text{컬럼 수} = (\text{파라미터 수 } \approx 300) \times (\text{기술통계량 수 } 8) = 2,400\text{개}$$
 
@@ -289,3 +291,4 @@ print("두 데이터프레임이 동일한가요?:", is_same)
 # 출력: True
 
 ```
+![2026-08-07-155956.png](/assets/images/2026-08-07-155956.png)
