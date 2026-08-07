@@ -97,6 +97,14 @@ for result in results:
 print("추론 완료! result.jpg 파일이 저장되었습니다.")
 ```
 
+#### Bus Original Image
+
+![2026-08-07-115808.png](/assets/images/2026-08-07-115808.png)
+
+#### YOLO Bus Result Image
+
+![2026-08-07-115928.png](/assets/images/2026-08-07-115928.png)
+
 ### WebRTC
 영상으로 실시간으로 객체를 탐지하려면 NVIDIA GPU 같은 것이 있는 것이 좋다. GPU 가 없는 경우에는 Latency 를 각오해야 한다.  특히 실시간으로 BOX 로 인식된 것을 보여주는 경우 매우 Latency 가 심하니 주의해야 한다.
 
